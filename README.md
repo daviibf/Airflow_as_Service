@@ -7,7 +7,7 @@
 4. Execute the script **./makedeb**
 
 ## Installing the generated package
-1. Install the deb package with the following command: **sudo dpkg -i airflow-equipamento_{version}.deb**
+1. Install the deb package with the following command: **sudo dpkg -i airflow-service{version}.deb**
 
 <!-- ## Changelog -->
 
