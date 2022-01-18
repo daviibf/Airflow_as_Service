@@ -1,0 +1,9 @@
+Package: airflow-service
+Version: 0:0.0.1-0
+Priority: required
+Architecture: all
+Section: multiverse/embedded
+Maintainer: Davi Barreto
+Depends: python3, python3-pip
+Pre-Depends: pkg-config, gcc, libtool, build-essential, autoconf, libopenblas-dev, automake, freetds-bin, krb5-user, ldap-utils, libsasl2-2, libsasl2-modules, libssl1.1, locales, lsb-release, sqlite3, unixodbc, libczmq-dev, libssl-dev, libffi-dev, libpq-dev
+Description: Airflow As Service Installer

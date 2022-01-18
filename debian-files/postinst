@@ -1,0 +1,120 @@
+#!/bin/bash
+# Authors: Davi Barreto
+# Version: 1.0
+
+# Name of the service to be installed
+service_name="airflow-service"
+WORK_DIR="/var/rscontrol/airflow-service" # Here it can be any path you want
+HOME_ROOT="/root"
+VENV_FILE="py_airflow"
+
+echo ""
+echo "Starting Installation Process"
+echo ""
+
+echo ""
+echo "Directory where the environment will be installed: $WORK_DIR" 
+
+list_pkg="build-essential \
+            freetds-bin \
+            krb5-user \
+            ldap-utils \
+            libffi6 \
+            libsasl2-2 \
+            libczmq-dev \
+            libssl-dev \
+            libsasl2-modules \
+            libssl1.1 \
+            locales  \
+            lsb-release \
+            sasl2-bin \
+            sqlite3 \
+            unixodbc"
+
+# Checking if the required packages are installed and installing them if not.
+UPDATE=1
+echo ""
+echo "Checking system prerequisites."
+echo ""
+for pkg in $list_pkg; do
+    if ! dpkg --get-selections | grep "$pkg" >/dev/null 
+    then
+        if [ "$UPDATE" -eq "1" ]
+            then
+                sudo apt-get update
+                UPDATE=0
+            fi
+        sudo apt-get -y install $pkg
+    fi
+done
+
+# If the pyenv installation has already been done, the script will only check if python 3.6.9 is installed and create the venv 
+# next if it has not been already done.
+if ! [[ -d $HOME_ROOT/.pyenv ]]
+then
+    export PYENV_ROOT=$HOME_ROOT/.pyenv
+
+    # Download the pyenv repository
+    curl https://pyenv.run | bash
+
+    # Some lines may be added to the ~/.bashrc once the pyenv is downloaded. To avoid repeated lines
+    # in the bashrc file, we check if the lines already exist before introducing them to it. 
+    if ! grep -Fxq 'export PYENV_ROOT="$HOME_ROOT/.pyenv"' $HOME_ROOT/.bashrc
+    then
+        echo 'export PYENV_ROOT="$HOME_ROOT/.pyenv"' >> $HOME_ROOT/.bashrc
+    fi
+
+    if ! grep -Fxq 'export PATH="$PYENV_ROOT/bin:$PATH"' $HOME_ROOT/.bashrc
+    then
+        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME_ROOT/.bashrc
+    fi
+
+    if ! grep -Fxq 'eval "$(pyenv init --path)"' $HOME_ROOT/.bashrc
+    then
+        echo 'eval "$(pyenv init --path)"' >> $HOME_ROOT/.bashrc
+    fi
+
+    # Reset the ~/.bashrc
+    source $HOME_ROOT/.bashrc
+fi
+
+echo ""
+echo "Installing python 3.8.11"
+echo ""
+
+# install python 3.8.11 from pyenv
+/root/.pyenv/bin/pyenv install 3.8.11 -s
+
+# We check if a local .python-version already exists to avoid conflict when running the (pyenv local) command.
+if  [[ -d $WORK_DIR/.python-version ]]
+then 
+    cd $WORK_DIR ; rm -rf .python-version
+fi
+
+echo ""
+echo "Preparing python environment and installing requirements"
+echo ""
+# Create a python 3.6.9 instance | Create the venv | Install pip requirements
+cd $WORK_DIR && \
+$HOME_ROOT/.pyenv/bin/pyenv local 3.8.11 && \
+$HOME_ROOT/.pyenv/shims/python -m venv $VENV_FILE && \
+source ${VENV_FILE}/bin/activate && \
+pip install --upgrade pip
+
+echo ""
+echo "Python 3.8.11 environment created."
+echo ""
+
+echo 'export AIRFLOW_HOME="/airflow"' >> $HOME_ROOT/.bashrc
+echo 'export AIRFLOW__CORE__LOAD_EXAMPLES="false"' >> $HOME_ROOT/.bashrc
+echo 'export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:password@localhost/airflow' >> $HOME_ROOT/.bashrc
+
+source $HOME_ROOT/.bashrc
+
+cd $WORK_DIR ; source $VENV_FILE/bin/activate ; pip install "apache-airflow[postgres]==2.1.0" --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.0/constraints-3.8.txt
+
+systemctl daemon-reload
+
+systemctl enable airflow.service
+
+service airflow start

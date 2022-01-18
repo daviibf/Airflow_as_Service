@@ -1,0 +1,104 @@
+#!/bin/bash
+# Created on: 27/07/2021
+# Authors: Davi Barreto, Otávio Guerra
+# Version: 1.0
+
+PKG_NAME="airflow-service"
+VERSION=`sed -rn 's/Version:[[:blank:]]*[0-9]+:([0-9.-]+)[[:blank:]]*$/\1/p' debian-files/control 2>/dev/null`
+ARCH=$(uname -p)
+
+WORKING_DIR=$(pwd)
+DEBIAN_DIR="${WORKING_DIR}/deb"
+
+SERVICE_PATH="/etc/systemd/system"
+SERVICE_DIR="${DEBIAN_DIR}${SERVICE_PATH}"
+
+PROJECT_PATH="/var/rscontrol/airflow-service"
+PROJECT_DIR="${DEBIAN_DIR}${PROJECT_PATH}"
+
+AIRFLOW_HOME="/airflow"
+AIRFLOW_DIR="${DEBIAN_DIR}${AIRFLOW_HOME}/dags"
+
+# create dest dirs
+create_dirs()
+{
+    echo '##### Criando diretórios... #####'
+    echo ''
+
+    mkdir -p ${DEBIAN_DIR}/DEBIAN
+
+    mkdir -p ${AIRFLOW_DIR}
+
+    mkdir -p ${SERVICE_DIR}
+
+    mkdir -p ${PROJECT_DIR}
+
+    # copy deb files
+    cp -a ${WORKING_DIR}/debian-files/* ${DEBIAN_DIR}/DEBIAN
+    return 0
+}
+
+# copy and check return value
+safe_cp()
+{
+    cp "$@"
+
+    if [ $? -ne 0 ]; then
+        echo "'$PKG_NAME': makedeb error when copying file: 'cp $@'"
+        # remove arquivos de build
+        remove_temp_files
+        exit 1
+    fi
+
+    return $?
+}
+
+# copy file to destiny
+copy_files()
+{
+    echo '##### Copying files... #####'
+    echo ''
+
+    safe_cp -a service/airflow.service ${SERVICE_DIR}
+    safe_cp -a airflow/dags/hello-world-dag.py ${AIRFLOW_DIR}
+    return $?
+}
+
+# create the .deb
+create_deb()
+{
+    echo '##### Creating package deb... #####'
+    echo ''
+
+    dpkg-deb -b ${DEBIAN_DIR} ${PKG_NAME}_${VERSION}.deb
+    return $?
+}
+
+# remove temp directory
+remove_deb_files()
+{
+    echo '##### Removing deb generation temp files... #####'
+    echo ''
+
+    rm -Rf ${DEBIAN_DIR}
+    return $?
+}
+
+# Main Body
+# Creating Dirs
+create_dirs
+if [ $? -ne 0 ] ; then echo "'$PKG_NAME': makedeb error when creating directories" && exit 1; fi
+
+# Copying Files
+copy_files
+if [ $? -ne 0 ] ; then echo "'$PKG_NAME': makedeb error when copying files" && exit 1; fi
+
+# Creating deb package
+create_deb
+if [ $? -ne 0 ] ; then echo "'$PKG_NAME': makedeb error when creating .deb" && exit 1; fi
+
+# Removing deb generation temp files
+remove_deb_files
+if [ $? -ne 0 ] ; then echo "'$PKG_NAME': makedeb error when removing deb generation temp files" && exit 1; fi
+
+exit 0
