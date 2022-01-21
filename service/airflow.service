@@ -24,18 +24,15 @@ Wants=postgresql.service mysql.service
 [Service]
 EnvironmentFile=/etc/environment
 Environment=AIRFLOW__CORE__LOAD_EXAMPLES='false'
-Environment=AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:password@localhost/airflow
+Environment=AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:ecclesiasancta@localhost/airflow
 Environment=AIRFLOW_HOME=/airflow
-# Environment=POSTGRES_USER=airflow
-# Environment=POSTGRES_PASSWORD=airflow
-# Environment=POSTGRES_DB=airflow
 User=root
 Group=root
 Type=simple
-ExecStartPre=/bin/bash -c 'source /var/rscontrol/airflow-service/py_airflow/bin/activate ; airflow db init'
-ExecStartPre=/bin/bash -c 'source /var/rscontrol/airflow-service/py_airflow/bin/activate ; airflow scheduler &> /dev/null &'
-ExecStartPre=/bin/bash -c 'source /var/rscontrol/airflow-service/py_airflow/bin/activate ; airflow users create -e "admin@airflow.com" -f "Davi" -l "Facanha" -p "admin" -r "Admin" -u "admin"'
-ExecStart=/bin/bash -c 'source /var/rscontrol/airflow-service/py_airflow/bin/activate ; airflow webserver'
+ExecStartPre=/bin/bash -c 'source /var/airflow-service/py_airflow/bin/activate ; airflow db init'
+ExecStartPre=/bin/bash -c 'source /var/airflow-service/py_airflow/bin/activate ; airflow scheduler &> /dev/null &'
+ExecStartPre=/bin/bash -c 'source /var/airflow-service/py_airflow/bin/activate ; airflow users create -e "admin@airflow.com" -f "Davi" -l "Facanha" -p "admin" -r "Admin" -u "admin"'
+ExecStart=/bin/bash -c 'source /var/airflow-service/py_airflow/bin/activate ; airflow webserver'
 Restart=on-failure
 RestartSec=5s
 PrivateTmp=true

@@ -4,7 +4,7 @@
 
 # Name of the service to be installed
 service_name="airflow-service"
-WORK_DIR="/var/rscontrol/airflow-service" # Here it can be any path you want
+WORK_DIR="/var/airflow-service" # Here it can be any path you want
 HOME_ROOT="/root"
 VENV_FILE="py_airflow"
 
@@ -104,12 +104,6 @@ pip install --upgrade pip
 echo ""
 echo "Python 3.8.11 environment created."
 echo ""
-
-echo 'export AIRFLOW_HOME="/airflow"' >> $HOME_ROOT/.bashrc
-echo 'export AIRFLOW__CORE__LOAD_EXAMPLES="false"' >> $HOME_ROOT/.bashrc
-echo 'export AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:password@localhost/airflow' >> $HOME_ROOT/.bashrc
-
-source $HOME_ROOT/.bashrc
 
 cd $WORK_DIR ; source $VENV_FILE/bin/activate ; pip install "apache-airflow[postgres]==2.1.0" --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.0/constraints-3.8.txt
 

@@ -13,7 +13,7 @@ DEBIAN_DIR="${WORKING_DIR}/deb"
 SERVICE_PATH="/etc/systemd/system"
 SERVICE_DIR="${DEBIAN_DIR}${SERVICE_PATH}"
 
-PROJECT_PATH="/var/rscontrol/airflow-service"
+PROJECT_PATH="/var/airflow-service"
 PROJECT_DIR="${DEBIAN_DIR}${PROJECT_PATH}"
 
 AIRFLOW_HOME="/airflow"
