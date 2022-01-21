@@ -24,7 +24,7 @@ Wants=postgresql.service mysql.service
 [Service]
 EnvironmentFile=/etc/environment
 Environment=AIRFLOW__CORE__LOAD_EXAMPLES='false'
-Environment=AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:ecclesiasancta@localhost/airflow
+Environment=AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://postgres:password@localhost/airflow
 Environment=AIRFLOW_HOME=/airflow
 User=root
 Group=root
