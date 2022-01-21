@@ -1,6 +1,7 @@
 .python-version
 uninstall.sh
 install.sh
+airflow-service_0.0.1-0.deb
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode,jupyternotebooks
 
